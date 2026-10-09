@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {today,almanac,format,parse,messages,split}=require('./core.cjs');
-const HELP='老黄历机器人\n/today 今天黄历（北京时间）\n/date 2026-10-18 指定日期\n/ask 2026-10-18 解释宜忌\n/ask 解释今天宜忌\n/id 查看你的用户ID\n\n查询不调用AI，只有 /ask 使用DeepSeek。解读问题及当日黄历会发给DeepSeek，不发送Telegram身份。';
+const HELP='老黄历机器人\n/template 复制命令模板\n/today 今天黄历（北京时间）\n/date 2026-10-18 指定日期\n/ask 2026-10-18 解释宜忌\n/ask 解释今天宜忌\n/id 查看你的用户ID\n\n查询不调用AI，只有 /ask 使用DeepSeek。解读问题及当日黄历会发给DeepSeek，不发送Telegram身份。';
 async function post(url, body, headers={}, timeout=45000) {
   let response;
   try {response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body),signal:AbortSignal.timeout(timeout)});}
@@ -42,7 +42,11 @@ function createHandler(c,state,persist,tg,ai=analyze,clock=()=>new Date()) {
     if(/^\/id(?:@\w+)?$/.test(m.text.trim())) return send(m.chat.id,`你的用户ID：${m.from.id}`);
     if(!c.allowed.has(String(m.from.id))) return send(m.chat.id,'未授权使用。发送 /id 获取ID，请管理员加入白名单。');
     let action; try {action=parse(m.text,clock());} catch(e) {return send(m.chat.id,e.message);}
-    if(action.kind==='start'||action.kind==='help') return send(m.chat.id,HELP);
+    if(action.kind==='template') {
+      const d=today(clock()), examples=[['今天黄历','/today'],['指定日期',`/date ${d}`],['AI解读',`/ask ${d} 解释当天宜忌`]];
+      return tg('sendMessage',{chat_id:m.chat.id,text:'点击按钮复制，粘贴到输入框后修改日期再发送。\n\n'+examples.map(([label,cmd])=>label+'：\n'+cmd).join('\n\n'),reply_markup:{inline_keyboard:examples.map(([label,text])=>[{text:'复制'+label,copy_text:{text}}])}});
+    }
+    if(action.kind==='start'||action.kind==='help') return tg('sendMessage',{chat_id:m.chat.id,text:HELP,reply_markup:{keyboard:[[{text:'今天黄历'},{text:'命令模板'}]],resize_keyboard:true,is_persistent:true}});
     const a=almanac(action.date);
     if(action.kind==='date') return send(m.chat.id,format(a));
     if(!c.key) return send(m.chat.id,format(a)+'\n\nAI尚未配置，当前只提供黄历查询。');
@@ -65,6 +69,7 @@ async function main() {
     if(!r.ok) throw new Error('Telegram接口失败'); return r.result;
   };
   const me=await tg('getMe'), hook=await tg('getWebhookInfo');
+  await tg('setMyCommands',{commands:[{command:'today',description:'今天黄历'},{command:'date',description:'查询指定日期（点击查看模板）'},{command:'ask',description:'AI解读（点击查看模板）'},{command:'template',description:'复制命令，修改日期即可'},{command:'help',description:'使用帮助和快捷按钮'},{command:'id',description:'我的用户ID'}]});
   if(hook.url) throw new Error('该机器人已设置webhook；请使用独立机器人或人工确认切换，不自动删除');
   const persist=()=>saveState(c.stateFile,state);
   const handler=createHandler(c,state,persist,tg);

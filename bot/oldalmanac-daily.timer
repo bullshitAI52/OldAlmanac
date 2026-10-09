@@ -1,0 +1,11 @@
+[Unit]
+Description=Send calendar at 00:01 Asia/Shanghai
+
+[Timer]
+OnCalendar=*-*-* 00:01:00 Asia/Shanghai
+Persistent=true
+AccuracySec=1s
+Unit=oldalmanac-daily.service
+
+[Install]
+WantedBy=timers.target

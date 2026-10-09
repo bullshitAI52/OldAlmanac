@@ -1,0 +1,1 @@
+{"name":"oldalmanac-bot","version":"0.2.0","private":true,"description":"Telegram daily calendar renderer","dependencies":{"playwright-core":"1.58.2"},"scripts":{"test":"node --test test.cjs daily.test.cjs"}}

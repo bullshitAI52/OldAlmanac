@@ -1,0 +1,23 @@
+[Unit]
+Description=Daily OldAlmanac image and plain-language interpretation
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=3600
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+User=oldalmanac-bot
+Group=oldalmanac-bot
+WorkingDirectory=/opt/oldalmanac-bot
+EnvironmentFile=/etc/oldalmanac-bot.env
+ExecStart=/usr/bin/flock -n /var/lib/oldalmanac-bot/daily.lock /opt/oldalmanac-bot/runtime/node /opt/oldalmanac-bot/bot/daily.cjs
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=300
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/oldalmanac-bot
+UMask=0077

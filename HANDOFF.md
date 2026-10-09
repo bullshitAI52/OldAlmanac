@@ -1,5 +1,16 @@
 # 开发及部署备份
 
+## 2026-10-09 · bot-v0.2 每日推送与命令模板
+
+- 新增北京时间00:01定时推送网页日历图片和DeepSeek大白话。每天发送刚进入的当天，图片和文字分别持久化防重复；网络结果不确定时需人工核查。
+- 图片直接从线上网页生成，已在VPS生成并目视检查，修正仅在截图会话应用的竖排对联重叠；原网页未改。
+- `/template` 提供三条命令复制按钮；`/date` 和 `/ask` 无参数时给模板；`/help` 显示快捷键盘。
+- 本地14项测试通过，覆盖时区、去重、命令模板及既有查询；真实定时发送待首个午夜任务验证，不声称已实际推送成功。
+- 已安装每日服务和定时器；私有配置含收件人和浏览器路径，个人ID与密钥不入库。
+- 运维：`systemctl list-timers oldalmanac-daily.timer` 查看下次执行；`journalctl -u oldalmanac-daily.service` 查结果。日历状态在 `/var/lib/oldalmanac-bot/daily`，不可删除当天状态以免重发。
+- 依赖：bot/package-lock.json 固定 playwright-core，服务器复用已有Chromium的服务可读副本；README有独立安装步骤。
+
+
 ## 2026-10-09 · bot-v0.1.3 配置完成
 
 - 用户指定的Telegram数字ID已加入服务器白名单；不在公开文档记录个人ID。

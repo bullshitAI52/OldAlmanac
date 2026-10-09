@@ -1,0 +1,4 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');const {due,sendPart}=require('./daily.cjs');
+test('跨午夜以北京时间00:01为界',()=>{assert.equal(due(new Date('2026-10-09T16:00:30Z')),false);assert.equal(due(new Date('2026-10-09T16:01:00Z')),true);});
+test('成功后重启不重复发，图片与文字分别计数',async()=>{let n=0;const r={};const send=async()=>n++;await sendPart(r,'photo',()=>{},send);await sendPart(r,'photo',()=>{},send);await sendPart(r,'text',()=>{},send);assert.equal(n,2);assert.deepEqual(r,{photo:'sent',text:'sent'});});
+test('失败或中断的发送不自动重复',async()=>{const r={};await assert.rejects(()=>sendPart(r,'photo',()=>{},async()=>{throw Error('timeout')}));assert.equal(r.photo,'uncertain');assert.equal(await sendPart(r,'photo',()=>{},()=>assert.fail()),false);r.text='sending';assert.equal(await sendPart(r,'text',()=>{},()=>assert.fail()),false);});

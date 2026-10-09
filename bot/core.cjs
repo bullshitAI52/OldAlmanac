@@ -17,6 +17,9 @@ function format(a) {
 }
 function parse(text, now) {
   text = text.trim();
+  if(text==='命令模板')text='/template';
+  if(text==='今天黄历')text='/today';
+  if(/^\/(template|date|ask)(?:@\w+)?$/.test(text))return {kind:'template'};
   if (text.length > 800) throw new Error('问题请控制在800字以内');
   if (/^\/(start|help|id)(?:@\w+)?$/.test(text)) return {kind:text.match(/^\/(\w+)/)[1]};
   if (/^\/today(?:@\w+)?$/.test(text) || text==='今天') return {kind:'date',date:today(now)};
