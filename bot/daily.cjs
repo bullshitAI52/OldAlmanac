@@ -60,7 +60,7 @@ async function main(){
   if(!fs.existsSync(png))await render(date,png,process.env.CHROMIUM_EXECUTABLE);
   if(!state.summary){
     const a=almanac(date);
-    try{state.summary=await analyze(c,a,'请把今天的黄历宜忌用日常大白话讲清楚，分为：今天一句话、适合做什么、少折腾什么、现实小提醒。避免生僻术语，不做吉凶保证，250字以内。');}
+    try{state.summary=await analyze(c,a,'请先读完给定的当天黄历资料，再按“今天的日历怎么理解、宜忌说人话、现实中怎么安排、最后总结”的顺序解释。把生僻宜忌词语翻成通俗意思，结合日常生活说明，最后用一两句话总结。不编造资料或保证吉凶，400字以内。');}
     catch{state.summary='今天的大白话解读暂时生成失败。宜：'+a.yi.join('、')+'；忌：'+a.ji.join('、')+'。以上为传统民俗参考，实际安排仍以天气、健康及工作需要为准。';state.aiFallback=true;}
     // One daily summary, shared by recipients. Separate from interactive /ask quota.
     persist();
