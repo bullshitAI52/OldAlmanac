@@ -13,7 +13,7 @@ async function post(url, body, headers={}, timeout=45000) {
 }
 async function analyze(config,a,question,request=post) {
   if(!config.key) throw new Error('尚未配置DeepSeek');
-  const data=await request('https://api.deepseek.com/chat/completions',{model:config.model,messages:messages(a,question),max_tokens:1200,stream:false},{Authorization:`Bearer ${config.key}`},60000);
+  const data=await request('https://api.deepseek.com/chat/completions',{model:config.model,thinking:{type:'disabled'},messages:messages(a,question),max_tokens:1200,stream:false},{Authorization:`Bearer ${config.key}`},60000);
   const choice=data?.choices?.[0];
   if(typeof choice?.message?.content!=='string' || !choice.message.content.trim()) throw new Error('AI未返回可用解读');
   return choice.message.content.trim()+(choice.finish_reason==='length'?'\n（解读达到长度上限）':'');
