@@ -60,7 +60,7 @@ async function main(){
   if(!fs.existsSync(png))await render(date,png,process.env.CHROMIUM_EXECUTABLE);
   if(!state.summary){
     const a=almanac(date);
-    try{state.summary=await analyze(c,a,'按聊天式模板解释这一天的黄历：少术语，分组讲清宜忌，时间和方位便于查看，最后自然总结。使用当天完整资料，约600至900字。');}
+    try{state.summary=await analyze(c,a,'按固定的四部分模板解读当天资料：宜与忌、时辰吉凶、吉神方位、干支五行与星宿，最后一句话总结。每项用大白话简短解释，不写长开场，不重复。内容以当天完整资料为准。');}
     catch{state.summary='今天的大白话解读暂时生成失败。宜：'+a.yi.join('、')+'；忌：'+a.ji.join('、')+'。以上为传统民俗参考，实际安排仍以天气、健康及工作需要为准。';state.aiFallback=true;}
     // One daily summary, shared by recipients. Separate from interactive /ask quota.
     persist();
