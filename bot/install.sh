@@ -9,7 +9,7 @@ install -d -m 755 /opt/oldalmanac-bot/bot /opt/oldalmanac-bot/runtime
 # Copy the executable: system node may be a symlink into a protected home.
 install -m 755 "$NODE" /opt/oldalmanac-bot/runtime/node
 install -m 644 "$ROOT/lunar.js" /opt/oldalmanac-bot/lunar.js
-for file in core.cjs server.cjs test.cjs; do install -m 644 "$ROOT/bot/$file" "/opt/oldalmanac-bot/bot/$file"; done
+for file in core.cjs server.cjs test.cjs interpretation-template.txt; do install -m 644 "$ROOT/bot/$file" "/opt/oldalmanac-bot/bot/$file"; done
 install -d -o oldalmanac-bot -g oldalmanac-bot -m 700 /var/lib/oldalmanac-bot
 if [ ! -f /etc/oldalmanac-bot.env ]; then install -m 600 "$ROOT/bot/.env.example" /etc/oldalmanac-bot.env; fi
 sed "s|/usr/local/bin/node|/opt/oldalmanac-bot/runtime/node|g" "$ROOT/bot/oldalmanac-bot.service" > /etc/systemd/system/oldalmanac-bot.service
