@@ -60,7 +60,7 @@ async function main(){
   if(!fs.existsSync(png))await render(date,png,process.env.CHROMIUM_EXECUTABLE);
   if(!state.summary){
     const a=almanac(date);
-    try{state.summary=await analyze(c,a,'请先读完给定的当天黄历资料，再按“今天的日历怎么理解、宜忌说人话、现实中怎么安排、最后总结”的顺序解释。把生僻宜忌词语翻成通俗意思，结合日常生活说明，最后用一两句话总结。不编造资料或保证吉凶，400字以内。');}
+    try{state.summary=await analyze(c,a,'请按系统要求的开场、宜与忌、时辰吉凶、吉神方位、干支五行与星宿、最后一句话总结模板，逐项解释这一天的黄历。使用当天完整资料，不照抄其他日期。约700至1000字。');}
     catch{state.summary='今天的大白话解读暂时生成失败。宜：'+a.yi.join('、')+'；忌：'+a.ji.join('、')+'。以上为传统民俗参考，实际安排仍以天气、健康及工作需要为准。';state.aiFallback=true;}
     // One daily summary, shared by recipients. Separate from interactive /ask quota.
     persist();
@@ -72,9 +72,16 @@ async function main(){
       await telegram(c.token,'sendPhoto',form);
     });
     await new Promise(r=>setTimeout(r,1200));
-    // Force a single Telegram message, so delivery state covers the whole summary.
-    const text=split(`${date} 日历大白话${state.aiFallback?'（本地备用说明）':' · DeepSeek'}\n\n${state.summary}`,3500)[0];
-    await sendPart(record,'text',persist,()=>telegram(c.token,'sendMessage',{chat_id:id,text}));
+    // Track each chunk separately; never cut off the final summary.
+    const parts=split(`${date} 日历大白话${state.aiFallback?'（本地备用说明）':' · DeepSeek'}\n\n${state.summary}`,3500);
+    if(!record.text){
+      for(let i=0;i<parts.length;i++){
+        await sendPart(record,'text'+i,persist,()=>telegram(c.token,'sendMessage',{chat_id:id,text:parts[i]}));
+        if(record['text'+i]!=='sent')break;
+        if(i<parts.length-1)await new Promise(r=>setTimeout(r,1200));
+      }
+      if(parts.every((_,i)=>record['text'+i]==='sent')){record.text='sent';persist();}
+    }
   }
   console.log(date+' 每日推送处理完成');
 }
